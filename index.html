@@ -270,7 +270,7 @@ function pickDeterministic(list, salt) {
 }
 
 function getTodayDecision() {
-    const key = getRitualDateKey(RITUAL_CUTOFF) + "|decision";
+    const key = getRitualDateKey(RITUAL_CUTOFF) + "|balanced";
     return hashToUnitInterval(key) < YES_PROBABILITY ? "yes" : "no";
 }
 
