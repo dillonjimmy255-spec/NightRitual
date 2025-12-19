@@ -1,108 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#000000">
-    <link rel="apple-touch-icon" href="icon-180x180.png"> <!-- Optional -->
-    <title>Evening Ritual</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<title>Evening Ritual</title>
 
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            transition: background-color 1s ease, color 1s ease;
-        }
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    transition: background-color 1s ease, color 1s ease;
+}
 
-        .container {
-            max-width: 80%;
-            padding: 20px;
-        }
+.container {
+    max-width: 80%;
+    padding: 20px;
+}
 
-        .shape {
-            width: 150px;
-            height: 150px;
-            margin: 0 auto 24px;
-            border-radius: 50%;
-            opacity: 0.75;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 3rem;
-        }
+.shape {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 24px;
+    border-radius: 50%;
+    opacity: 0.75;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3rem;
+}
 
-        .message {
-            font-size: 1.2rem;
-            line-height: 1.5;
-            margin-bottom: 16px;
-        }
+.message {
+    font-size: 1.2rem;
+    line-height: 1.5;
+    margin-bottom: 16px;
+}
 
-        #date-display {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
+#date-display {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
 
-        /* Daytime */
-        .daytime {
-            background-color: #ffffff;
-            color: #333;
-        }
+.daytime {
+    background-color: #ffffff;
+    color: #333;
+}
 
-        .daytime .shape {
-            background-color: #f0f0f0;
-            border: 2px solid #ddd;
-        }
+.daytime .shape {
+    background-color: #f0f0f0;
+    border: 2px solid #ddd;
+}
 
-        /* Yes night */
-        .yes-night {
-            background-color: #141414;
-            color: #f0f0f0;
-        }
+.yes-night {
+    background-color: #141414;
+    color: #f0f0f0;
+}
 
-        .yes-night .shape {
-            background-color: #d8a8a8;
-        }
+.yes-night .shape {
+    background-color: #d8a8a8;
+}
 
-        /* No night */
-        .no-night {
-            background-color: #121212;
-            color: #f0f0f0;
-        }
+.no-night {
+    background-color: #121212;
+    color: #f0f0f0;
+}
 
-        .no-night .shape {
-            background-color: #333;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            body {
-                transition: none;
-            }
-        }
-    </style>
+.no-night .shape {
+    background-color: #333;
+}
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <div class="shape" id="emoji"></div>
-        <div class="message" id="message"></div>
-        <div id="date-display"></div>
-    </div>
+<div class="container">
+    <div class="shape" id="emoji"></div>
+    <div class="message" id="message"></div>
+    <div id="date-display"></div>
+</div>
 
-    <script>
-        /************************************************************
-         * CONFIGURATION
-         ************************************************************/
-
-        const DECISION_HOUR = 21;      // 9 PM
-        const RITUAL_CUTOFF = 6;       // 6 AM → 6 AM day
-        const YES_PROBABILITY = 0.5;   // change odds here (0.0–1.0)
+<script>
+/************************************************************
+ * CONFIG
+ ************************************************************/
+const DECISION_HOUR = 21;
+const RITUAL_CUTOFF = 6;
+const YES_PROBABILITY = 0.5;
 
         /************************************************************
          * EMOJI LISTS
@@ -256,93 +245,71 @@
 ];
 
         /************************************************************
-         * DETERMINISTIC RANDOMNESS (NO STORAGE)
-         ************************************************************/
+ * DETERMINISTIC CORE
+ ************************************************************/
+function getRitualDateKey(cutoff) {
+    const now = new Date();
+    const d = new Date(now);
+    if (now.getHours() < cutoff) d.setDate(d.getDate() - 1);
+    return d.toISOString().slice(0, 10);
+}
 
-        function getRitualDateKey(cutoffHour) {
-            const now = new Date();
-            const ritualDate = new Date(now);
+function hashToUnitInterval(str) {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) {
+        h = (h << 5) - h + str.charCodeAt(i);
+        h |= 0;
+    }
+    return (h >>> 0) / 4294967296;
+}
 
-            if (now.getHours() < cutoffHour) {
-                ritualDate.setDate(ritualDate.getDate() - 1);
-            }
+function pickDeterministic(list, salt) {
+    const key = getRitualDateKey(RITUAL_CUTOFF) + "|" + salt;
+    const idx = Math.floor(hashToUnitInterval(key) * list.length);
+    return list[idx];
+}
 
-            return ritualDate.toISOString().slice(0, 10); // YYYY-MM-DD
+function getTodayDecision() {
+    const key = getRitualDateKey(RITUAL_CUTOFF) + "|decision";
+    return hashToUnitInterval(key) < YES_PROBABILITY ? "yes" : "no";
+}
+
+/************************************************************
+ * DISPLAY
+ ************************************************************/
+function updateDisplay() {
+    const hour = new Date().getHours();
+    const body = document.body;
+    const emojiEl = document.getElementById("emoji");
+    const messageEl = document.getElementById("message");
+    const dateEl = document.getElementById("date-display");
+
+    body.className = "";
+
+    if (hour < DECISION_HOUR) {
+        body.classList.add("daytime");
+        emojiEl.textContent = pickDeterministic(daytimeEmojis, "day-emoji");
+        messageEl.textContent = pickDeterministic(daytimeMessages, "day-message");
+        dateEl.textContent = `The evening decision appears at ${DECISION_HOUR}:00.`;
+    } else {
+        const decision = getTodayDecision();
+
+        if (decision === "yes") {
+            body.classList.add("yes-night");
+            emojiEl.textContent = pickDeterministic(yesNightEmojis, "yes-emoji");
+            messageEl.textContent = pickDeterministic(yesNightMessages, "yes-message");
+        } else {
+            body.classList.add("no-night");
+            emojiEl.textContent = pickDeterministic(noNightEmojis, "no-emoji");
+            messageEl.textContent = pickDeterministic(noNightMessages, "no-message");
         }
 
-        function hashToUnitInterval(str) {
-            let hash = 0;
+        dateEl.textContent = `Tonight is a ${decision} night.`;
+    }
+}
 
-            for (let i = 0; i < str.length; i++) {
-                hash = (hash << 5) - hash + str.charCodeAt(i);
-                hash |= 0;
-            }
-
-            return (hash >>> 0) / 4294967296;
-        }
-
-        function getTodayDecision() {
-            const key = getRitualDateKey(RITUAL_CUTOFF);
-            const value = hashToUnitInterval(key + "|balanced");
-            return value < YES_PROBABILITY ? "yes" : "no";
-        }
-
-        function getDeterministicEmoji(emojiList, salt) {
-            const key = getRitualDateKey(RITUAL_CUTOFF) + "|" + salt;
-            const index = Math.floor(
-                hashToUnitInterval(key) * emojiList.length
-            );
-            return emojiList[index];
-        }
-
-        function getDeterministicMessage(messages, salt) {
-            const key = getRitualDateKey(RITUAL_CUTOFF) + "|" + salt;
-            const index = Math.floor(
-                hashToUnitInterval(key) * messages.length
-            );
-            return messages[index];
-        }
-
-        /************************************************************
-         * DISPLAY LOGIC
-         ************************************************************/
-
-        function updateDisplay() {
-            const now = new Date();
-            const hour = now.getHours();
-
-            const body = document.body;
-            const messageEl = document.getElementById("message");
-            const dateEl = document.getElementById("date-display");
-            const emojiEl = document.getElementById("emoji");
-
-            body.classList.remove("daytime", "yes-night", "no-night");
-
-            if (hour < DECISION_HOUR) {
-                // Daytime: nature emoji + daytime message
-                body.classList.add("daytime");
-                messageEl.textContent = getDeterministicMessage(daytimeMessages, "day");
-                emojiEl.textContent = getDeterministicEmoji(daytimeEmojis, "day-emoji");
-                dateEl.textContent = `The evening decision appears at ${DECISION_HOUR}:00.`;
-            } else {
-                // Evening: "yes" or "no" result
-                const decision = getTodayDecision();
-
-                if (decision === "yes") {
-                    body.classList.add("yes-night");
-                    messageEl.textContent = getDeterministicMessage(yesNightMessages, "yes");
-                    emojiEl.textContent = getDeterministicEmoji(yesNightEmojis, "yes-emoji"); // ✅
-                } else {
-                    body.classList.add("no-night");
-                    messageEl.textContent = getDeterministicMessage(noNightMessages, "no");
-                    emojiEl.textContent = getDeterministicEmoji(noNightEmojis, "no-emoji"); // Romantic emoji
-                }
-                dateEl.textContent = `Tonight is a ${decision} night.`;
-            }
-        }
-
-        updateDisplay();
-        setInterval(updateDisplay, 60 * 1000);
-    </script>
+updateDisplay();
+setInterval(updateDisplay, 60000);
+</script>
 </body>
 </html>
