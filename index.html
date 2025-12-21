@@ -268,7 +268,7 @@
         }
 
         function getTodayDecision() {
-            const key = getRitualDateKey(RITUAL_CUTOFF) + "|decision";
+            const key = getRitualDateKey(RITUAL_CUTOFF) + "|decisionkey";
             return hashToUnitInterval(key) < YES_PROBABILITY ? "yes" : "no";
         }
 
