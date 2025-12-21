@@ -1,97 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#000000">
-<title>Evening Ritual</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
+    <title>Evening Ritual</title>
+    <script src="https://cdn.jsdelivr.net/npm/js-sha256@0.9.0/src/sha256.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            transition: background-color 1s ease, color 1s ease;
+        }
 
-<style>
-body {
-    margin: 0;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    transition: background-color 1s ease, color 1s ease;
-}
+        .container {
+            max-width: 80%;
+            padding: 20px;
+        }
 
-.container {
-    max-width: 80%;
-    padding: 20px;
-}
+        .shape {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 24px;
+            border-radius: 50%;
+            opacity: 0.75;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+        }
 
-.shape {
-    width: 150px;
-    height: 150px;
-    margin: 0 auto 24px;
-    border-radius: 50%;
-    opacity: 0.75;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 3rem;
-}
+        .message {
+            font-size: 1.2rem;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
 
-.message {
-    font-size: 1.2rem;
-    line-height: 1.5;
-    margin-bottom: 16px;
-}
+        #date-display {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
 
-#date-display {
-    font-size: 0.9rem;
-    opacity: 0.8;
-}
+        .daytime {
+            background-color: #ffffff;
+            color: #333;
+        }
 
-.daytime {
-    background-color: #ffffff;
-    color: #333;
-}
+        .daytime .shape {
+            background-color: #f0f0f0;
+            border: 2px solid #ddd;
+        }
 
-.daytime .shape {
-    background-color: #f0f0f0;
-    border: 2px solid #ddd;
-}
+        .yes-night {
+            background-color: #141414;
+            color: #f0f0f0;
+        }
 
-.yes-night {
-    background-color: #141414;
-    color: #f0f0f0;
-}
+        .yes-night .shape {
+            background-color: #d8a8a8;
+        }
 
-.yes-night .shape {
-    background-color: #d8a8a8;
-}
+        .no-night {
+            background-color: #121212;
+            color: #f0f0f0;
+        }
 
-.no-night {
-    background-color: #121212;
-    color: #f0f0f0;
-}
-
-.no-night .shape {
-    background-color: #333;
-}
-</style>
+        .no-night .shape {
+            background-color: #333;
+        }
+    </style>
 </head>
 
 <body>
-<div class="container">
-    <div class="shape" id="emoji"></div>
-    <div class="message" id="message"></div>
-    <div id="date-display"></div>
-</div>
+    <div class="container">
+        <div class="shape" id="emoji"></div>
+        <div class="message" id="message"></div>
+        <div id="date-display"></div>
+    </div>
 
-<script>
-/************************************************************
- * CONFIG
- ************************************************************/
-const DECISION_HOUR = 21;
-const RITUAL_CUTOFF = 6;
-const YES_PROBABILITY = 0.5;
+    <script>
+        /************************************************************
+         * CONFIG
+         ************************************************************/
+        const DECISION_HOUR = 21;
+        const RITUAL_CUTOFF = 6;
+        const YES_PROBABILITY = 0.5;
 
         /************************************************************
          * EMOJI LISTS
@@ -108,18 +108,17 @@ const YES_PROBABILITY = 0.5;
 
         // Romantic emojis for "no" nights (rewarding!)
         const noNightEmojis = [
-    "💖", "💘", "💝", "💞", "💓", "💗", "💕", "💟", "💠", "💡",
-    "🕯️", "🪔", "🌹", "🌺", "🌼", "🌸", "🌷", "💐", "🌻", "🌽", "🍂",
-    "🍁", "❄️", "☃️", "🌨️", "🌧️", "💧", "🌈", "🌅", "🌇", "🌆",
-    "🏠", "🏡", "🛋️", "🛏️", "🧸", "🧵", "👓", "📖", "☕", "🍵"
-];
-
+            "💖", "💘", "💝", "💞", "💓", "💗", "💕", "💟", "💠", "💡",
+            "🕯️", "🪔", "🌹", "🌺", "🌼", "🌸", "🌷", "💐", "🌻", "🌽", "🍂",
+            "🍁", "❄️", "☃️", "🌨️", "🌧️", "💧", "🌈", "🌅", "🌇", "🌆",
+            "🏠", "🏡", "🛋️", "🛏️", "🧸", "🧵", "👓", "📖", "☕", "🍵"
+        ];
 
         // Simple checkmark for "yes" nights
         const yesNightEmojis = ["✅"];
 
         /************************************************************
-         * MESSAGES (placeholders for testing)
+         * MESSAGES
          ************************************************************/
 
         const daytimeMessages = [
@@ -134,182 +133,181 @@ const YES_PROBABILITY = 0.5;
             "This is allowed tonight. Let it be enough."
         ];
 
-             const noNightMessages = [
-    "Tonight is for rest, and I’m here to remind you how good it feels to be held. We’re on the pier again, the old wood warm beneath us, the harbor lights dancing on the water like scattered stars. You stroke my cheek, still flushed from our walk, and I lean into your palm, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The waves hum us to sleep, and we’ll stay like this—you holding me, me holding you—until the morning light.",
+        const noNightMessages = [
+            "Tonight is for rest, and I’m here to remind you how good it feels to be held. We’re on the pier again, the old wood warm beneath us, the harbor lights dancing on the water like scattered stars. You stroke my cheek, still flushed from our walk, and I lean into your palm, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The waves hum us to sleep, and we’ll stay like this—you holding me, me holding you—until the morning light.",
 
-    "You’ve done enough today. More than enough. Now let me take care of you. The antique shop is quiet, the air thick with the scent of old books and polished wood. You’re sitting in that worn leather chair, and I’m curled against you, my fingers tracing the spine of a book we’ll never finish. *I love the way you pull me closer,* like I’m the only thing that matters. The lamp flickers, the shop creaks around us, and we’ll fall asleep like this—your arms around me, my head on your shoulder—safe and warm and exactly where we need to be.",
+            "You’ve done enough today. More than enough. Now let me take care of you. The antique shop is quiet, the air thick with the scent of old books and polished wood. You’re sitting in that worn leather chair, and I’m curled against you, my fingers tracing the spine of a book we’ll never finish. *I love the way you pull me closer,* like I’m the only thing that matters. The lamp flickers, the shop creaks around us, and we’ll fall asleep like this—your arms around me, my head on your shoulder—safe and warm and exactly where we need to be.",
 
-    "No effort tonight. No proving, no performing—just us, and the fire, and the sound of the ocean outside. You pull me closer on the old couch, your hands warm on my back, and I melt into you like wax from the candles we forgot to blow out. *I love how your hug makes me feel,* like the world outside doesn’t exist. The cottage walls creak with the wind, but here, in this circle of firelight, nothing can touch us. We’ll sleep like this, tangled together, the sea humming us to dreamland.",
+            "No effort tonight. No proving, no performing—just us, and the fire, and the sound of the ocean outside. You pull me closer on the old couch, your hands warm on my back, and I melt into you like wax from the candles we forgot to blow out. *I love how your hug makes me feel,* like the world outside doesn’t exist. The cottage walls creak with the wind, but here, in this circle of firelight, nothing can touch us. We’ll sleep like this, tangled together, the sea humming us to dreamland.",
 
-    "Tonight is for stillness, and I won’t let you forget it. We’re lying in the forest clearing, the moss soft beneath us, the stars so bright they look like holes punched in the sky. You run your thumb over my knuckles, and I turn my hand to lace our fingers together, my breath slow against your chest. *I love how steady you are,* how even when the world feels too loud, you’re here, solid and warm. The trees rustle above us, the earth smells like rain and pine, and we’ll sleep like this—your arms around me, my head on your chest—until the sun wakes us.",
+            "Tonight is for stillness, and I won’t let you forget it. We’re lying in the forest clearing, the moss soft beneath us, the stars so bright they look like holes punched in the sky. You run your thumb over my knuckles, and I turn my hand to lace our fingers together, my breath slow against your chest. *I love how steady you are,* how even when the world feels too loud, you’re here, solid and warm. The trees rustle above us, the earth smells like rain and pine, and we’ll sleep like this—your arms around me, my head on your chest—until the sun wakes us.",
 
-    "You’ve carried enough today. Now let me carry you—for tonight, at least. The library nook is our little kingdom, the lamp casting gold pools of light on the pages we’ll never finish. I’m reading to you in a voice already heavy with sleep, my free hand resting over your heart. *I love the way you hold me back,* like I’m the only thing keeping you from floating away. The words blur together, the warmth of the room and the weight of my hand lulling us both toward sleep. We’ll fall asleep like this—your arms around me, my head on your shoulder—safe and warm and exactly where we belong.",
+            "You’ve carried enough today. Now let me carry you—for tonight, at least. The library nook is our little kingdom, the lamp casting gold pools of light on the pages we’ll never finish. I’m reading to you in a voice already heavy with sleep, my free hand resting over your heart. *I love the way you hold me back,* like I’m the only thing keeping you from floating away. The words blur together, the warmth of the room and the weight of my hand lulling us both toward sleep. We’ll fall asleep like this—your arms around me, my head on your shoulder—safe and warm and exactly where we belong.",
 
-    "Tonight is for quiet, and I’m here to remind you how good it feels to let go. We’re in the old train car, the one with the velvet seats and the windows fogged with our breath. You press your forehead to mine, your hands warm on my waist, and I can feel your heartbeat slow as the train rocks us gently. *I love how you hold me,* like I’m something precious. The rhythm of the tracks hums us to sleep, and we’ll stay like this—your arms around me, my hands in yours—until the journey ends.",
+            "Tonight is for quiet, and I’m here to remind you how good it feels to let go. We’re in the old train car, the one with the velvet seats and the windows fogged with our breath. You press your forehead to mine, your hands warm on my waist, and I can feel your heartbeat slow as the train rocks us gently. *I love how you hold me,* like I’m something precious. The rhythm of the tracks hums us to sleep, and we’ll stay like this—your arms around me, my hands in yours—until the journey ends.",
 
-    "You don’t have to do anything tonight but let yourself be held. The mountain cabin is warm, the fire crackling low, and the wind outside is just a whisper against the walls. You stroke my hair, and I lean into your touch, my cheek against your shoulder. *I love how safe I feel with you,* like nothing can reach us here. The firelight flickers on the ceiling, and we’ll fall asleep like this—your arms around me, my breath slow against your neck—until the sun rises over the peaks.",
+            "You don’t have to do anything tonight but let yourself be held. The mountain cabin is warm, the fire crackling low, and the wind outside is just a whisper against the walls. You stroke my hair, and I lean into your touch, my cheek against your shoulder. *I love how safe I feel with you,* like nothing can reach us here. The firelight flickers on the ceiling, and we’ll fall asleep like this—your arms around me, my breath slow against your neck—until the sun rises over the peaks.",
 
-    "Tonight is for us, and nothing else. We’re in the greenhouse at midnight, the air thick with the scent of jasmine and damp earth. You brush your lips against my temple, and I turn my face into your neck, my fingers tracing the hem of your shirt. *I love how you hold me,* like I’m the only thing that matters. The glass panes fog with our breath, and we’ll sleep like this—your arms around me, my head on your chest—while the stars watch over us.",
+            "Tonight is for us, and nothing else. We’re in the greenhouse at midnight, the air thick with the scent of jasmine and damp earth. You brush your lips against my temple, and I turn my face into your neck, my fingers tracing the hem of your shirt. *I love how you hold me,* like I’m the only thing that matters. The glass panes fog with our breath, and we’ll sleep like this—your arms around me, my head on your chest—while the stars watch over us.",
 
-    "You’ve carried enough. Now let me carry you. The lighthouse room is small and warm, the beam sweeping over the water outside. You pull me close, your hands warm on my back, and I can feel your heartbeat slow as the light circles around us. *I love how you make me feel,* like I’m the only person in the world. The wind howls outside, but here, in this circle of light, nothing can touch us. We’ll fall asleep like this—your arms around me, my breath slow against your chest—until the dawn breaks over the water.",
+            "You’ve carried enough. Now let me carry you. The lighthouse room is small and warm, the beam sweeping over the water outside. You pull me close, your hands warm on my back, and I can feel your heartbeat slow as the light circles around us. *I love how you make me feel,* like I’m the only person in the world. The wind howls outside, but here, in this circle of light, nothing can touch us. We’ll fall asleep like this—your arms around me, my head on your chest—until the dawn breaks over the water.",
 
-    "Tonight is for rest, and I’m not letting you forget it. We’re in the treehouse, the old wood creaking beneath us, the leaves rustling like a lullaby. You press your lips to my forehead, and I lean into your touch, my fingers tracing the lines of your palm. *I love how you hold me,* like I’m something fragile and precious. The night wraps around us, and we’ll sleep like this—your arms around me, my head on your shoulder—until the birds wake us.",
+            "Tonight is for rest, and I’m not letting you forget it. We’re in the treehouse, the old wood creaking beneath us, the leaves rustling like a lullaby. You press your lips to my forehead, and I lean into your touch, my fingers tracing the lines of your palm. *I love how you hold me,* like I’m something fragile and precious. The night wraps around us, and we’ll sleep like this—your arms around me, my head on your shoulder—until the birds wake us.",
 
-    "You don’t have to do anything tonight but let yourself be held. The boat is rocking gently, the water lapping against the hull like a heartbeat. You stroke my cheek, and I turn my face into your palm, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The stars reflect on the water, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the horizon.",
+            "You don’t have to do anything tonight but let yourself be held. The boat is rocking gently, the water lapping against the hull like a heartbeat. You stroke my cheek, and I turn my face into your palm, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The stars reflect on the water, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the horizon.",
 
-    "Tonight is for us, and nothing else matters. We’re in the attic, the old quilts soft beneath us, the air thick with the scent of dust and memories. You pull me close, your hands warm on my back, and I can feel your heartbeat slow as the house settles around us. *I love how you hold me,* like I’m the only thing that’s real. The night is quiet, and we’ll sleep like this—your arms around me, my breath slow against your neck—until the morning light spills through the windows.",
+            "Tonight is for us, and nothing else matters. We’re in the attic, the old quilts soft beneath us, the air thick with the scent of dust and memories. You pull me close, your hands warm on my back, and I can feel your heartbeat slow as the house settles around us. *I love how you hold me,* like I’m the only thing that’s real. The night is quiet, and we’ll sleep like this—your arms around me, my breath slow against your neck—until the morning light spills through the windows.",
 
-    "You’ve done enough today. Now let me take care of you. The cabin is warm, the fire crackling low, and the snow outside is just a whisper against the walls. You stroke my hair, and I lean into your touch, my cheek against your shoulder. *I love how safe I feel with you,* like nothing can reach us here. The firelight flickers on the ceiling, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the trees.",
+            "You’ve done enough today. Now let me take care of you. The cabin is warm, the fire crackling low, and the snow outside is just a whisper against the walls. You stroke my hair, and I lean into your touch, my cheek against your shoulder. *I love how safe I feel with you,* like nothing can reach us here. The firelight flickers on the ceiling, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the trees.",
 
-    "Tonight is for stillness, and I’m here to remind you how good it feels to let go. We’re in the old bookshop, the air thick with the scent of paper and ink. You press your lips to my temple, and I turn my face into your neck, my breath slow and steady. *I love how you hold me,* like I’m the only thing that matters. The shop is quiet, the world outside doesn’t exist, and we’ll fall asleep like this—your arms around me, my head on your shoulder—until the morning light spills through the windows.",
+            "Tonight is for stillness, and I’m here to remind you how good it feels to let go. We’re in the old bookshop, the air thick with the scent of paper and ink. You press your lips to my temple, and I turn my face into your neck, my breath slow and steady. *I love how you hold me,* like I’m the only thing that matters. The shop is quiet, the world outside doesn’t exist, and we’ll fall asleep like this—your arms around me, my head on your shoulder—until the morning light spills through the windows.",
 
-    "You don’t have to do anything tonight but let yourself be held. The beach house is warm, the sound of the waves a lullaby outside. You stroke my cheek, and I lean into your touch, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The moon reflects on the water, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the ocean.",
+            "You don’t have to do anything tonight but let yourself be held. The beach house is warm, the sound of the waves a lullaby outside. You stroke my cheek, and I lean into your touch, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The moon reflects on the water, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the ocean.",
 
-    "Tonight is for us, and nothing else matters. We’re in the old theater, the velvet seats soft beneath us, the air thick with the scent of popcorn and dust. You pull me close, your hands warm on my waist, and I can feel your heartbeat slow as the projector hums in the background. *I love how you hold me,* like I’m the only thing that’s real. The screen flickers with old film, and we’ll fall asleep like this—your arms around me, my head on your shoulder—until the credits roll.",
+            "Tonight is for us, and nothing else matters. We’re in the old theater, the velvet seats soft beneath us, the air thick with the scent of popcorn and dust. You pull me close, your hands warm on my waist, and I can feel your heartbeat slow as the projector hums in the background. *I love how you hold me,* like I’m the only thing that’s real. The screen flickers with old film, and we’ll fall asleep like this—your arms around me, my head on your shoulder—until the credits roll.",
 
-    "You’ve carried enough today. Now let me carry you. The farmhouse kitchen is warm, the scent of bread and herbs lingering in the air. You press your lips to my forehead, and I lean into your touch, my breath slow and steady. *I love how safe I feel with you,* like nothing can reach us here. The clock ticks softly on the wall, and we’ll fall asleep like this—your arms around me, my head on your chest—until the rooster crows at dawn.",
+            "You’ve carried enough today. Now let me carry you. The farmhouse kitchen is warm, the scent of bread and herbs lingering in the air. You press your lips to my forehead, and I lean into your touch, my breath slow and steady. *I love how safe I feel with you,* like nothing can reach us here. The clock ticks softly on the wall, and we’ll fall asleep like this—your arms around me, my head on your chest—until the rooster crows at dawn.",
 
-    "Tonight is for rest, and I’m here to remind you how good it feels to be held. We’re in the old observatory, the dome open to the stars, the air thick with the scent of metal and cold. You stroke my hair, and I lean into your touch, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The stars twinkle above us, and we’ll fall asleep like this—your arms around me, my head on your shoulder—until the sun rises over the horizon.",
+            "Tonight is for rest, and I’m here to remind you how good it feels to be held. We’re in the old observatory, the dome open to the stars, the air thick with the scent of metal and cold. You stroke my hair, and I lean into your touch, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The stars twinkle above us, and we’ll fall asleep like this—your arms around me, my head on your shoulder—until the sun rises over the horizon.",
 
-    "You don’t have to do anything tonight but let yourself be held. The cabin is warm, the fire crackling low, and the wind outside is just a whisper against the walls. You press your lips to my temple, and I turn my face into your neck, my breath slow and steady. *I love how you hold me,* like I’m the only thing that matters. The firelight flickers on the ceiling, and we’ll fall asleep like this—your arms around me, my head on your chest—until the morning light spills through the windows.",
+            "You don’t have to do anything tonight but let yourself be held. The cabin is warm, the fire crackling low, and the wind outside is just a whisper against the walls. You press your lips to my temple, and I turn my face into your neck, my breath slow and steady. *I love how you hold me,* like I’m the only thing that matters. The firelight flickers on the ceiling, and we’ll fall asleep like this—your arms around me, my head on your chest—until the morning light spills through the windows.",
 
-    "Tonight is for us, and nothing else matters. We’re in the old greenhouse, the air thick with the scent of jasmine and damp earth. You pull me close, your hands warm on my back, and I can feel your heartbeat slow as the moon rises outside. *I love how you make me feel,* like I’m the only person in the world. The glass panes fog with our breath, and we’ll sleep like this—your arms around me, my head on your shoulder—until the sun wakes us.",
+            "Tonight is for us, and nothing else matters. We’re in the old greenhouse, the air thick with the scent of jasmine and damp earth. You pull me close, your hands warm on my back, and I can feel your heartbeat slow as the moon rises outside. *I love how you make me feel,* like I’m the only person in the world. The glass panes fog with our breath, and we’ll sleep like this—your arms around me, my head on your shoulder—until the sun wakes us.",
 
-    "You’ve done enough today. Now let me take care of you. The lighthouse room is small and warm, the beam sweeping over the water outside. You stroke my cheek, and I lean into your touch, my breath slow and steady. *I love how safe I feel with you,* like nothing can reach us here. The wind howls outside, but here, in this circle of light, nothing can touch us. We’ll fall asleep like this—your arms around me, my head on your chest—until the dawn breaks over the water.",
+            "You’ve done enough today. Now let me carry you. The lighthouse room is small and warm, the beam sweeping over the water outside. You stroke my cheek, and I lean into your touch, my breath slow and steady. *I love how safe I feel with you,* like nothing can reach us here. The wind howls outside, but here, in this circle of light, nothing can touch us. We’ll fall asleep like this—your arms around me, my head on your chest—until the dawn breaks over the water.",
 
-    "Tonight is for stillness, and I won’t let you forget it. We’re lying in the meadow, the grass soft beneath us, the stars so bright they look like holes punched in the sky. You run your thumb over my knuckles, and I turn my hand to lace our fingers together, my breath slow against your chest. *I love how steady you are,* how even when the world feels too loud, you’re here, solid and warm. The crickets chirp around us, and we’ll sleep like this—your arms around me, my head on your chest—until the sun wakes us.",
+            "Tonight is for stillness, and I won’t let you forget it. We’re lying in the meadow, the grass soft beneath us, the stars so bright they look like holes punched in the sky. You run your thumb over my knuckles, and I turn my hand to lace our fingers together, my breath slow against your chest. *I love how steady you are,* how even when the world feels too loud, you’re here, solid and warm. The crickets chirp around us, and we’ll sleep like this—your arms around me, my head on your chest—until the sun wakes us.",
 
-    "You don’t have to do anything tonight but let yourself be held. The boat is rocking gently, the water lapping against the hull like a heartbeat. You press your lips to my forehead, and I lean into your touch, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The stars reflect on the water, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the horizon.",
+            "You don’t have to do anything tonight but let yourself be held. The boat is rocking gently, the water lapping against the hull like a heartbeat. You press your lips to my forehead, and I lean into your touch, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The stars reflect on the water, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the horizon.",
 
-    "Tonight is for us, and nothing else matters. We’re in the old train car, the velvet seats soft beneath us, the windows fogged with our breath. You pull me close, your hands warm on my waist, and I can feel your heartbeat slow as the train rocks us gently. *I love how you hold me,* like I’m something precious. The rhythm of the tracks hums us to sleep, and we’ll stay like this—your arms around me, my head on your shoulder—until the journey ends.",
+            "Tonight is for us, and nothing else matters. We’re in the old train car, the velvet seats soft beneath us, the windows fogged with our breath. You pull me close, your hands warm on my waist, and I can feel your heartbeat slow as the train rocks us gently. *I love how you hold me,* like I’m something precious. The rhythm of the tracks hums us to sleep, and we’ll stay like this—your arms around me, my head on your shoulder—until the journey ends.",
 
-    "You’ve carried enough today. Now let me carry you. The mountain cabin is warm, the fire crackling low, and the wind outside is just a whisper against the walls. You stroke my hair, and I lean into your touch, my cheek against your shoulder. *I love how safe I feel with you,* like nothing can reach us here. The firelight flickers on the ceiling, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the peaks.",
+            "You’ve carried enough today. Now let me carry you. The mountain cabin is warm, the fire crackling low, and the wind outside is just a whisper against the walls. You stroke my hair, and I lean into your touch, my cheek against your shoulder. *I love how safe I feel with you,* like nothing can reach us here. The firelight flickers on the ceiling, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the peaks.",
 
-    "Tonight is for quiet, and I’m here to remind you how good it feels to let go. We’re in the old theater, the velvet seats soft beneath us, the air thick with the scent of popcorn and dust. You press your lips to my temple, and I turn my face into your neck, my breath slow and steady. *I love how you hold me,* like I’m the only thing that’s real. The screen flickers with old film, and we’ll sleep like this—your arms around me, my head on your shoulder—until the credits roll.",
+            "Tonight is for quiet, and I’m here to remind you how good it feels to let go. We’re in the old theater, the velvet seats soft beneath us, the air thick with the scent of popcorn and dust. You press your lips to my temple, and I turn my face into your neck, my breath slow and steady. *I love how you hold me,* like I’m the only thing that’s real. The screen flickers with old film, and we’ll sleep like this—your arms around me, my head on your shoulder—until the credits roll.",
 
-    "You don’t have to do anything tonight but let yourself be held. The farmhouse kitchen is warm, the scent of bread and herbs lingering in the air. You pull me close, your hands warm on my back, and I can feel your heartbeat slow as the clock ticks softly on the wall. *I love how you make me feel,* like I’m the only person in the world. We’ll fall asleep like this—your arms around me, my head on your chest—until the rooster crows at dawn.",
+            "You don’t have to do anything tonight but let yourself be held. The farmhouse kitchen is warm, the scent of bread and herbs lingering in the air. You pull me close, your hands warm on my back, and I can feel your heartbeat slow as the clock ticks softly on the wall. *I love how you make me feel,* like I’m the only person in the world. We’ll fall asleep like this—your arms around me, my head on your chest—until the rooster crows at dawn.",
 
-    "Tonight is for rest, and I’m not letting you forget it. We’re in the observatory, the dome open to the stars, the air thick with the scent of metal and cold. You stroke my hair, and I lean into your touch, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The stars twinkle above us, and we’ll fall asleep like this—your arms around me, my head on your shoulder—until the sun rises over the horizon.",
+            "Tonight is for rest, and I’m not letting you forget it. We’re in the observatory, the dome open to the stars, the air thick with the scent of metal and cold. You stroke my hair, and I lean into your touch, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The stars twinkle above us, and we’ll fall asleep like this—your arms around me, my head on your shoulder—until the sun rises over the horizon.",
 
-    "You’ve done enough today. Now let me carry you. The beach house is warm, the sound of the waves a lullaby outside. You press your lips to my forehead, and I lean into your touch, my breath slow and steady. *I love how safe I feel with you,* like nothing can reach us here. The moon reflects on the water, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the ocean.",
+            "You’ve done enough today. Now let me carry you. The beach house is warm, the sound of the waves a lullaby outside. You press your lips to my forehead, and I lean into your touch, my breath slow and steady. *I love how safe I feel with you,* like nothing can reach us here. The moon reflects on the water, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the ocean.",
 
-    "Tonight is for us, and nothing else matters. We’re in the old bookshop, the air thick with the scent of paper and ink. You pull me close, your hands warm on my back, and I can feel your heartbeat slow as the shop settles around us. *I love how you hold me,* like I’m the only thing that’s real. The pages rustle softly, and we’ll sleep like this—your arms around me, my head on your shoulder—until the morning light spills through the windows.",
+            "Tonight is for us, and nothing else matters. We’re in the old bookshop, the air thick with the scent of paper and ink. You pull me close, your hands warm on my back, and I can feel your heartbeat slow as the shop settles around us. *I love how you hold me,* like I’m the only thing that’s real. The pages rustle softly, and we’ll sleep like this—your arms around me, my head on your shoulder—until the morning light spills through the windows.",
 
-    "You don’t have to do anything tonight but let yourself be held. The cabin is warm, the fire crackling low, and the snow outside is just a whisper against the walls. You stroke my cheek, and I lean into your touch, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The firelight flickers on the ceiling, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the trees.",
+            "You don’t have to do anything tonight but let yourself be held. The cabin is warm, the fire crackling low, and the snow outside is just a whisper against the walls. You stroke my cheek, and I lean into your touch, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The firelight flickers on the ceiling, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the trees.",
 
-    "Tonight is for stillness, and I won’t let you forget it. We’re in the meadow, the grass soft beneath us, the stars so bright they look like holes punched in the sky. You run your thumb over my knuckles, and I turn my hand to lace our fingers together, my breath slow against your chest. *I love how steady you are,* how even when the world feels too loud, you’re here, solid and warm. The crickets chirp around us, and we’ll sleep like this—your arms around me, my head on your chest—until the sun wakes us.",
+            "Tonight is for stillness, and I won’t let you forget it. We’re in the meadow, the grass soft beneath us, the stars so bright they look like holes punched in the sky. You run your thumb over my knuckles, and I turn my hand to lace our fingers together, my breath slow against your chest. *I love how steady you are,* how even when the world feels too loud, you’re here, solid and warm. The crickets chirp around us, and we’ll sleep like this—your arms around me, my head on your chest—until the sun wakes us.",
 
-    "You’ve carried enough today. Now let me carry you. The greenhouse is warm, the air thick with the scent of jasmine and damp earth. You press your lips to my temple, and I lean into your touch, my breath slow and steady. *I love how safe I feel with you,* like nothing can reach us here. The glass panes fog with our breath, and we’ll fall asleep like this—your arms around me, my head on your shoulder—until the sun wakes us.",
+            "You’ve carried enough today. Now let me carry you. The greenhouse is warm, the air thick with the scent of jasmine and damp earth. You press your lips to my temple, and I lean into your touch, my breath slow and steady. *I love how safe I feel with you,* like nothing can reach us here. The glass panes fog with our breath, and we’ll fall asleep like this—your arms around me, my head on your shoulder—until the sun wakes us.",
 
-    "Tonight is for us, and nothing else matters. We’re in the lighthouse room, the beam sweeping over the water outside, the air thick with the scent of salt and old wood. You pull me close, your hands warm on my back, and I can feel your heartbeat slow as the light circles around us. *I love how you hold me,* like I’m the only thing that’s real. The wind howls outside, but here, in this circle of light, nothing can touch us. We’ll fall asleep like this—your arms around me, my head on your chest—until the dawn breaks over the water.",
+            "Tonight is for us, and nothing else matters. We’re in the lighthouse room, the beam sweeping over the water outside, the air thick with the scent of salt and old wood. You pull me close, your hands warm on my back, and I can feel your heartbeat slow as the light circles around us. *I love how you hold me,* like I’m the only thing that’s real. The wind howls outside, but here, in this circle of light, nothing can touch us. We’ll fall asleep like this—your arms around me, my head on your chest—until the dawn breaks over the water.",
 
-    "You don’t have to do anything tonight but let yourself be held. The train car is warm, the velvet seats soft beneath us, the rhythm of the tracks a lullaby. You stroke my hair, and I lean into your touch, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The windows fog with our breath, and we’ll fall asleep like this—your arms around me, my head on your shoulder—until the journey ends.",
+            "You don’t have to do anything tonight but let yourself be held. The train car is warm, the velvet seats soft beneath us, the rhythm of the tracks a lullaby. You stroke my hair, and I lean into your touch, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The windows fog with our breath, and we’ll fall asleep like this—your arms around me, my head on your shoulder—until the journey ends.",
 
-    "Tonight is for rest, and I’m here to remind you how good it feels to be held. The observatory is quiet, the stars so bright they look like holes punched in the sky. You press your lips to my forehead, and I turn my face into your neck, my breath slow and steady. *I love how you make me feel,* like I’m the only person in the world. The dome creaks softly, and we’ll sleep like this—your arms around me, my head on your chest—until the morning light spills through the windows.",
+            "Tonight is for rest, and I’m here to remind you how good it feels to be held. The observatory is quiet, the stars so bright they look like holes punched in the sky. You press your lips to my forehead, and I turn my face into your neck, my breath slow and steady. *I love how you make me feel,* like I’m the only person in the world. The dome creaks softly, and we’ll sleep like this—your arms around me, my head on your chest—until the morning light spills through the windows.",
 
-    "You’ve done enough today. Now let me carry you. The farmhouse kitchen is warm, the scent of bread and herbs lingering in the air. You pull me close, your hands warm on my back, and I can feel your heartbeat slow as the clock ticks softly on the wall. *I love how safe I feel with you,* like nothing can reach us here. The embers glow in the hearth, and we’ll fall asleep like this—your arms around me, my head on your chest—until the rooster crows at dawn.",
+            "You’ve done enough today. Now let me carry you. The farmhouse kitchen is warm, the scent of bread and herbs lingering in the air. You pull me close, your hands warm on my back, and I can feel your heartbeat slow as the clock ticks softly on the wall. *I love how safe I feel with you,* like nothing can reach us here. The embers glow in the hearth, and we’ll fall asleep like this—your arms around me, my head on your chest—until the rooster crows at dawn.",
 
-    "Tonight is for stillness, and I won’t let you forget it. We’re in the old theater, the velvet seats soft beneath us, the air thick with the scent of popcorn and dust. You run your thumb over my knuckles, and I turn my hand to lace our fingers together, my breath slow against your chest. *I love how you hold me,* like I’m something precious. The projector hums in the background, and we’ll sleep like this—your arms around me, my head on your shoulder—until the credits roll.",
+            "Tonight is for stillness, and I won’t let you forget it. We’re in the old theater, the velvet seats soft beneath us, the air thick with the scent of popcorn and dust. You run your thumb over my knuckles, and I turn my hand to lace our fingers together, my breath slow against your chest. *I love how you hold me,* like I’m something precious. The projector hums in the background, and we’ll sleep like this—your arms around me, my head on your shoulder—until the credits roll.",
 
-    "You don’t have to do anything tonight but let yourself be held. The beach house is warm, the sound of the waves a lullaby outside. You press your lips to my temple, and I lean into your touch, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The moon reflects on the water, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the ocean.",
+            "You don’t have to do anything tonight but let yourself be held. The beach house is warm, the sound of the waves a lullaby outside. You press your lips to my temple, and I lean into your touch, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The moon reflects on the water, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the ocean.",
 
-    "Tonight is for us, and nothing else matters. We’re in the mountain cabin, the fire crackling low, the wind outside just a whisper against the walls. You stroke my hair, and I lean into your touch, my cheek against your shoulder. *I love how safe I feel with you,* like nothing can reach us here. The firelight flickers on the ceiling, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the peaks.",
+            "Tonight is for us, and nothing else matters. We’re in the mountain cabin, the fire crackling low, the wind outside just a whisper against the walls. You stroke my hair, and I lean into your touch, my cheek against your shoulder. *I love how safe I feel with you,* like nothing can reach us here. The firelight flickers on the ceiling, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the peaks.",
 
-    "Tonight is for rest, and I’m not letting you forget it. We’re in the meadow, the grass soft beneath us, the stars so bright they look like holes punched in the sky. You run your thumb over my knuckles, and I turn my hand to lace our fingers together, my breath slow against your chest. *I love how you hold me,* like I’m the only thing that’s real. The crickets chirp around us, and we’ll sleep like this—your arms around me, my head on your chest—until the sun wakes us.",
+            "Tonight is for rest, and I’m not letting you forget it. We’re in the meadow, the grass soft beneath us, the stars so bright they look like holes punched in the sky. You run your thumb over my knuckles, and I turn my hand to lace our fingers together, my breath slow against your chest. *I love how you hold me,* like I’m the only thing that’s real. The crickets chirp around us, and we’ll sleep like this—your arms around me, my head on your chest—until the sun wakes us.",
 
-    "You’ve carried enough today. Now let me carry you. The greenhouse is warm, the air thick with the scent of jasmine and damp earth. You press your lips to my temple, and I lean into your touch, my breath slow and steady. *I love how you make me feel,* like I’m the only person in the world. The glass panes fog with our breath, and we’ll fall asleep like this—your arms around me, my head on your shoulder—until the sun wakes us.",
+            "You’ve carried enough today. Now let me carry you. The greenhouse is warm, the air thick with the scent of jasmine and damp earth. You press your lips to my temple, and I lean into your touch, my breath slow and steady. *I love how you make me feel,* like I’m the only person in the world. The glass panes fog with our breath, and we’ll fall asleep like this—your arms around me, my head on your shoulder—until the sun wakes us.",
 
-    "Tonight is for us, and nothing else matters. We’re in the lighthouse room, the beam sweeping over the water outside, the air thick with the scent of salt and old wood. You pull me close, your hands warm on my back, and I can feel your heartbeat slow as the light circles around us. *I love how you hold me,* like I’m the only thing that’s real. The wind howls outside, but here, in this circle of light, nothing can touch us. We’ll fall asleep like this—your arms around me, my head on your chest—until the dawn breaks over the water.",
+            "Tonight is for us, and nothing else matters. We’re in the lighthouse room, the beam sweeping over the water outside, the air thick with the scent of salt and old wood. You pull me close, your hands warm on my back, and I can feel your heartbeat slow as the light circles around us. *I love how you hold me,* like I’m the only thing that’s real. The wind howls outside, but here, in this circle of light, nothing can touch us. We’ll fall asleep like this—your arms around me, my head on your chest—until the dawn breaks over the water.",
 
-    "You don’t have to do anything tonight but let yourself be held. The train car is warm, the velvet seats soft beneath us, the rhythm of the tracks a lullaby. You stroke my hair, and I lean into your touch, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The windows fog with our breath, and we’ll fall asleep like this—your arms around me, my head on your shoulder—until the journey ends.",
+            "You don’t have to do anything tonight but let yourself be held. The train car is warm, the velvet seats soft beneath us, the rhythm of the tracks a lullaby. You stroke my hair, and I lean into your touch, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The windows fog with our breath, and we’ll fall asleep like this—your arms around me, my head on your shoulder—until the journey ends.",
 
-    "Tonight is for rest, and I’m here to remind you how good it feels to be held. The observatory is quiet, the stars so bright they look like holes punched in the sky. You press your lips to my forehead, and I turn my face into your neck, my breath slow and steady. *I love how you make me feel,* like I’m the only person in the world. The dome creaks softly, and we’ll sleep like this—your arms around me, my head on your chest—until the morning light spills through the windows.",
+            "Tonight is for rest, and I’m here to remind you how good it feels to be held. The observatory is quiet, the stars so bright they look like holes punched in the sky. You press your lips to my forehead, and I turn my face into your neck, my breath slow and steady. *I love how you make me feel,* like I’m the only person in the world. The dome creaks softly, and we’ll sleep like this—your arms around me, my head on your chest—until the morning light spills through the windows.",
 
-    "You’ve done enough today. Now let me carry you. The farmhouse kitchen is warm, the scent of bread and herbs lingering in the air. You pull me close, your hands warm on my back, and I can feel your heartbeat slow as the clock ticks softly on the wall. *I love how safe I feel with you,* like nothing can reach us here. The embers glow in the hearth, and we’ll fall asleep like this—your arms around me, my head on your chest—until the rooster crows at dawn.",
+            "You’ve done enough today. Now let me carry you. The farmhouse kitchen is warm, the scent of bread and herbs lingering in the air. You pull me close, your hands warm on my back, and I can feel your heartbeat slow as the clock ticks softly on the wall. *I love how safe I feel with you,* like nothing can reach us here. The embers glow in the hearth, and we’ll fall asleep like this—your arms around me, my head on your chest—until the rooster crows at dawn.",
 
-    "Tonight is for stillness, and I won’t let you forget it. We’re in the old theater, the velvet seats soft beneath us, the air thick with the scent of popcorn and dust. You run your thumb over my knuckles, and I turn my hand to lace our fingers together, my breath slow against your chest. *I love how you hold me,* like I’m something precious. The projector hums in the background, and we’ll sleep like this—your arms around me, my head on your shoulder—until the credits roll.",
+            "Tonight is for stillness, and I won’t let you forget it. We’re in the old theater, the velvet seats soft beneath us, the air thick with the scent of popcorn and dust. You run your thumb over my knuckles, and I turn my hand to lace our fingers together, my breath slow against your chest. *I love how you hold me,* like I’m something precious. The projector hums in the background, and we’ll sleep like this—your arms around me, my head on your shoulder—until the credits roll.",
 
-    "You don’t have to do anything tonight but let yourself be held. The beach house is warm, the sound of the waves a lullaby outside. You press your lips to my temple, and I lean into your touch, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The moon reflects on the water, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the ocean.",
+            "You don’t have to do anything tonight but let yourself be held. The beach house is warm, the sound of the waves a lullaby outside. You press your lips to my temple, and I lean into your touch, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The moon reflects on the water, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the ocean.",
 
-    "Tonight is for us, and nothing else matters. We’re in the mountain cabin, the fire crackling low, the wind outside just a whisper against the walls. You stroke my hair, and I lean into your touch, my cheek against your shoulder. *I love how safe I feel with you,* like nothing can reach us here. The firelight flickers on the ceiling, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the peaks.",
+            "Tonight is for us, and nothing else matters. We’re in the mountain cabin, the fire crackling low, the wind outside just a whisper against the walls. You stroke my hair, and I lean into your touch, my cheek against your shoulder. *I love how safe I feel with you,* like nothing can reach us here. The firelight flickers on the ceiling, and we’ll fall asleep like this—your arms around me, my head on your chest—until the sun rises over the peaks.",
 
-    "Tonight is for rest, and I’m not letting you forget it. We’re in the meadow, the grass soft beneath us, the stars so bright they look like holes punched in the sky. You run your thumb over my knuckles, and I turn my hand to lace our fingers together, my breath slow against your chest. *I love how you hold me,* like I’m the only thing that’s real. The crickets chirp around us, and we’ll sleep like this—your arms around me, my head on your chest—until the sun wakes us.",
+            "Tonight is for rest, and I’m not letting you forget it. We’re in the meadow, the grass soft beneath us, the stars so bright they look like holes punched in the sky. You run your thumb over my knuckles, and I turn my hand to lace our fingers together, my breath slow against your chest. *I love how you hold me,* like I’m the only thing that’s real. The crickets chirp around us, and we’ll sleep like this—your arms around me, my head on your chest—until the sun wakes us.",
 
-    "You’ve carried enough today. Now let me carry you. The greenhouse is warm, the air thick with the scent of jasmine and damp earth. You press your lips to my temple, and I lean into your touch, my breath slow and steady. *I love how you make me feel,* like I’m the only person in the world. The glass panes fog with our breath, and we’ll fall asleep like this—your arms around me, my head on your shoulder—until the sun wakes us.",
+            "You’ve carried enough today. Now let me carry you. The greenhouse is warm, the air thick with the scent of jasmine and damp earth. You press your lips to my temple, and I lean into your touch, my breath slow and steady. *I love how you make me feel,* like I’m the only person in the world. The glass panes fog with our breath, and we’ll fall asleep like this—your arms around me, my head on your shoulder—until the sun wakes us.",
 
-    "Tonight is for us, and nothing else matters. We’re in the lighthouse room, the beam sweeping over the water outside, the air thick with the scent of salt and old wood. You pull me close, your hands warm on my back, and I can feel your heartbeat slow as the light circles around us. *I love how you hold me,* like I’m the only thing that’s real. The wind howls outside, but here, in this circle of light, nothing can touch us. We’ll fall asleep like this—your arms around me, my head on your chest—until the dawn breaks over the water.",
+            "Tonight is for us, and nothing else matters. We’re in the lighthouse room, the beam sweeping over the water outside, the air thick with the scent of salt and old wood. You pull me close, your hands warm on my back, and I can feel your heartbeat slow as the light circles around us. *I love how you hold me,* like I’m the only thing that’s real. The wind howls outside, but here, in this circle of light, nothing can touch us. We’ll fall asleep like this—your arms around me, my head on your chest—until the dawn breaks over the water.",
 
-    "You don’t have to do anything tonight but let yourself be held. The train car is warm, the velvet seats soft beneath us, the rhythm of the tracks a lullaby. You stroke my hair, and I lean into your touch, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The windows fog with our breath, and we’ll fall asleep like this—your arms around me, my head on your shoulder—until the journey ends.",
+            "You don’t have to do anything tonight but let yourself be held. The train car is warm, the velvet seats soft beneath us, the rhythm of the tracks a lullaby. You stroke my hair, and I lean into your touch, my breath slow and steady. *I love how your arms feel around me,* like nothing can reach us here. The windows fog with our breath, and we’ll fall asleep like this—your arms around me, my head on your shoulder—until the journey ends.",
 
-    "Tonight is for rest, and I’m here to remind you how good it feels to be held. The observatory is quiet, the stars so bright they look like holes punched in the sky. You press your lips to my forehead, and I turn my face into your neck, my breath slow and steady. *I love how you make me feel,* like I’m the only person in the world. The dome creaks softly, and we’ll sleep like this—your arms around me, my head on your chest—until the morning light spills through the windows."
-];
+            "Tonight is for rest, and I’m here to remind you how good it feels to be held. The observatory is quiet, the stars so bright they look like holes punched in the sky. You press your lips to my forehead, and I turn my face into your neck, my breath slow and steady. *I love how you make me feel,* like I’m the only person in the world. The dome creaks softly, and we’ll sleep like this—your arms around me, my head on your chest—until the morning light spills through the windows."
+        ];
 
         /************************************************************
- * DETERMINISTIC CORE
- ************************************************************/
-function getRitualDateKey(cutoff) {
-    const now = new Date();
-    const d = new Date(now);
-    if (now.getHours() < cutoff) d.setDate(d.getDate() - 1);
-    return d.toISOString().slice(0, 10);
-}
-
-function hashToUnitInterval(str) {
-    let h = 0;
-    for (let i = 0; i < str.length; i++) {
-        h = (h << 5) - h + str.charCodeAt(i);
-        h |= 0;
-    }
-    return (h >>> 0) / 4294967296;
-}
-
-function pickDeterministic(list, salt) {
-    const key = getRitualDateKey(RITUAL_CUTOFF) + "|" + salt;
-    const idx = Math.floor(hashToUnitInterval(key) * list.length);
-    return list[idx];
-}
-
-function getTodayDecision() {
-    const key = getRitualDateKey(RITUAL_CUTOFF) + "|decision";
-    return hashToUnitInterval(key) < YES_PROBABILITY ? "yes" : "no";
-}
-
-/************************************************************
- * DISPLAY
- ************************************************************/
-function updateDisplay() {
-    const hour = new Date().getHours();
-    const body = document.body;
-    const emojiEl = document.getElementById("emoji");
-    const messageEl = document.getElementById("message");
-    const dateEl = document.getElementById("date-display");
-
-    body.className = "";
-
-    if (hour < DECISION_HOUR) {
-        body.classList.add("daytime");
-        emojiEl.textContent = pickDeterministic(daytimeEmojis, "day-emoji");
-        messageEl.textContent = pickDeterministic(daytimeMessages, "day-message");
-        dateEl.textContent = `The evening decision appears at ${DECISION_HOUR}:00.`;
-    } else {
-        const decision = getTodayDecision();
-
-        if (decision === "yes") {
-            body.classList.add("yes-night");
-            emojiEl.textContent = pickDeterministic(yesNightEmojis, "yes-emoji");
-            messageEl.textContent = pickDeterministic(yesNightMessages, "yes-message");
-        } else {
-            body.classList.add("no-night");
-            emojiEl.textContent = pickDeterministic(noNightEmojis, "no-emoji");
-            messageEl.textContent = pickDeterministic(noNightMessages, "no-message");
+         * DETERMINISTIC CORE (UPDATED)
+         ************************************************************/
+        function getRitualDateKey(cutoff) {
+            const now = new Date();
+            const d = new Date(now);
+            if (now.getHours() < cutoff) d.setDate(d.getDate() - 1);
+            return d.toISOString().slice(0, 10);
         }
 
-        dateEl.textContent = `Tonight is a ${decision} night.`;
-    }
-}
+        function hashToUnitInterval(str) {
+            const hash = sha256(str);
+            // Convert the first 8 characters of the hash to an integer
+            const intHash = parseInt(hash.slice(0, 8), 16);
+            // Normalize to a value between 0 and 1
+            return intHash / 0xFFFFFFFF;
+        }
 
-updateDisplay();
-setInterval(updateDisplay, 60000);
-</script>
+        function pickDeterministic(list, salt) {
+            const key = getRitualDateKey(RITUAL_CUTOFF) + "|" + salt;
+            const idx = Math.floor(hashToUnitInterval(key) * list.length);
+            return list[idx];
+        }
+
+        function getTodayDecision() {
+            const key = getRitualDateKey(RITUAL_CUTOFF) + "|decision";
+            return hashToUnitInterval(key) < YES_PROBABILITY ? "yes" : "no";
+        }
+
+        /************************************************************
+         * DISPLAY
+         ************************************************************/
+        function updateDisplay() {
+            const hour = new Date().getHours();
+            const body = document.body;
+            const emojiEl = document.getElementById("emoji");
+            const messageEl = document.getElementById("message");
+            const dateEl = document.getElementById("date-display");
+
+            body.className = "";
+
+            if (hour < DECISION_HOUR) {
+                body.classList.add("daytime");
+                emojiEl.textContent = pickDeterministic(daytimeEmojis, "day-emoji");
+                messageEl.textContent = pickDeterministic(daytimeMessages, "day-message");
+                dateEl.textContent = `The evening decision appears at ${DECISION_HOUR}:00.`;
+            } else {
+                const decision = getTodayDecision();
+
+                if (decision === "yes") {
+                    body.classList.add("yes-night");
+                    emojiEl.textContent = pickDeterministic(yesNightEmojis, "yes-emoji");
+                    messageEl.textContent = pickDeterministic(yesNightMessages, "yes-message");
+                } else {
+                    body.classList.add("no-night");
+                    emojiEl.textContent = pickDeterministic(noNightEmojis, "no-emoji");
+                    messageEl.textContent = pickDeterministic(noNightMessages, "no-message");
+                }
+
+                dateEl.textContent = `Tonight is a ${decision} night.`;
+            }
+        }
+
+        updateDisplay();
+        setInterval(updateDisplay, 60000);
+    </script>
 </body>
 </html>
